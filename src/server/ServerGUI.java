@@ -121,8 +121,9 @@ public class ServerGUI extends JFrame {
 
 		add(group, BorderLayout.SOUTH);
 
-		setLocation(500, 500);
-		setPreferredSize(new Dimension(1000, 1000));
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setLocation(200, 50);
+		setPreferredSize(new Dimension(1000, 700));
 		pack();
 		setVisible(true);
 	}

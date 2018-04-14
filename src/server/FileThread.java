@@ -59,7 +59,6 @@ public class FileThread extends Thread {
 	private void sendFile(int i) {
 
 		try {
-
 			File file = FileServer.files.elementAt(i).file;
 			OutputStream send = socket.getOutputStream();
 			FileInputStream fileReader = new FileInputStream(file);
@@ -75,7 +74,6 @@ public class FileThread extends Thread {
 			send.close();
 			fileReader.close();
 			socket.close();
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

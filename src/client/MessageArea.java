@@ -6,7 +6,6 @@ import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
@@ -43,10 +42,9 @@ public class MessageArea extends JPanel implements Scrollable {
 		revalidate();
 	}
 
-	public void addImagePanel(BufferedImage read) {
-		if (read.getHeight() > 200)
-			read = GifLabel.toBufferedImage(
-					read.getScaledInstance(read.getWidth() * 200 / read.getHeight(), 200, Image.SCALE_DEFAULT));
+	public void addImagePanel(Image read) {
+		if (read.getHeight(null) > 200)
+			read = read.getScaledInstance(read.getWidth(null) * 200 / read.getHeight(null), 200, Image.SCALE_DEFAULT);
 		add(new MessagePanel(read), gc);
 		gc.gridy++;
 		repaint();

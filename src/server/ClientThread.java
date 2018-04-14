@@ -145,16 +145,13 @@ public class ClientThread extends Thread {
 					out.println("$changeUserResult_successful_" + string);
 					File file;
 					if (indexSecond != 0) {
-						file = new File("chat history/" + username + "~" + Users.users.elementAt(indexSecond).username
-								+ ".txt");
+						file = new File("chatHistory/" + username + "~" + Users.users.elementAt(indexSecond).username + ".txt");
 						if (!file.exists())
-							file = new File("chat history/" + Users.users.elementAt(indexSecond).username + "~"
-									+ username + ".txt");
+							file = new File("chatHistory/" + Users.users.elementAt(indexSecond).username + "~" + username + ".txt");
 						secondPerson = Users.users.elementAt(indexSecond).socket;
-						outSecond = new PrintWriter(
-								new BufferedWriter(new OutputStreamWriter(secondPerson.getOutputStream())), true);
+						outSecond = new PrintWriter(new BufferedWriter(new OutputStreamWriter(secondPerson.getOutputStream())), true);
 					} else
-						file = new File("chat history/Lobby.txt");
+						file = new File("chatHistory/Lobby.txt");
 					fileW = new PrintWriter(new BufferedWriter(new FileWriter(file, true)), true);
 					Scanner s = new Scanner(new BufferedReader(new FileReader(file)));
 					out.println("$history_start");

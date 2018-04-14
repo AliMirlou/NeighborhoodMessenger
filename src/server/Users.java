@@ -35,16 +35,15 @@ public class Users {
 	static void initialize() {
 
 		try {
-			pw = new PrintWriter(new BufferedWriter(new FileWriter("Users.txt", true)), true);
-			s = new Scanner(new BufferedReader(new FileReader(new File("Users.txt"))));
+			pw = new PrintWriter(new BufferedWriter(new FileWriter("users.txt", true)), true);
+			s = new Scanner(new BufferedReader(new FileReader(new File("users.txt"))));
 			while (s.hasNext()) {
 				String u = s.nextLine();
 				users.addElement(new UserStruct(u, s.nextLine()));
 				ServerGUI.users.append(u + '\n');
 			}
 			users.elementAt(0).socket = new Socket();
-		} catch (IOException e) {
-		}
+		} catch (IOException e) {}
 
 	}
 
@@ -58,7 +57,7 @@ public class Users {
 
 	static int find(String a) {
 
-		for (int i = 0; i < users.size(); i++)
+		for (int i = 0; i < users.size(); ++i)
 			if (users.elementAt(i).username.equals(a))
 				return i;
 		return -1;

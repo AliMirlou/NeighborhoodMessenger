@@ -3,15 +3,14 @@ package client;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.geom.Area;
 import java.awt.geom.RoundRectangle2D;
-import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -23,7 +22,6 @@ public class MessagePanel extends JPanel {
 	private static final long serialVersionUID = 210L;
 
 	private JLabel messageLabel = new JLabel();
-	private Font font = new Font("", Font.BOLD, 20);
 
 	public MessagePanel(String message) {
 
@@ -31,12 +29,12 @@ public class MessagePanel extends JPanel {
 		setOpaque(false);
 
 		messageLabel.setText(message);
-		messageLabel.setFont(font);
+		messageLabel.setFont(ClientGUI.font);
 		add(messageLabel);
 
 	}
 
-	public MessagePanel(BufferedImage image) {
+	public MessagePanel(Image image) {
 
 		setOpaque(false);
 

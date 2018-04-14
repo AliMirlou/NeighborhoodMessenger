@@ -27,15 +27,14 @@ public class GifLabel extends JLabel {
 
 	public GifLabel() {
 		try {
-			image = toBufferedImage((ImageIO.read(new File("back.png")).getScaledInstance(ClientGUI.frameWidth,
-					ClientGUI.frameHeight, Image.SCALE_DEFAULT)));
+			image = toBufferedImage(ImageIO.read(new File("images/backgrounds/AbsurdMountains.png")).getScaledInstance(ClientGUI.frameWidth, ClientGUI.frameHeight, Image.SCALE_SMOOTH));
 			setIcon(new ImageIcon(image));
 
 			timerTask = new TimerTask() {
 				private int count = 25;
 
 				public void run() {
-					count++;
+					++count;
 					if (count > 50) {
 						count = 0;
 						if (direction < 0)
@@ -53,9 +52,9 @@ public class GifLabel extends JLabel {
 		}
 	}
 
-	public static BufferedImage toBufferedImage(Image img) {
-		if (img instanceof BufferedImage)
-			return (BufferedImage) img;
+	private BufferedImage toBufferedImage(Image img) {
+//		if (img instanceof BufferedImage)
+//			return (BufferedImage) img;
 
 		BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
 

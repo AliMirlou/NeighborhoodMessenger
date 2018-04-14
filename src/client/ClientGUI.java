@@ -4,7 +4,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+//import java.awt.DisplayMode;
 import java.awt.Font;
+//import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
@@ -22,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-import javax.imageio.ImageIO;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -47,6 +48,8 @@ public class ClientGUI extends JFrame {
 	private Client client;
 	private Socket onlines;
 
+	Toolkit toolkit;
+
 	static int frameWidth;
 	static int frameHeight;
 
@@ -69,7 +72,8 @@ public class ClientGUI extends JFrame {
 	private JMenuItem profile = new JMenuItem("Profile");
 	private JMenuItem signout = new JMenuItem("Sign Out");
 
-	private Image banner;
+	private ImageIcon unknownUser;
+	private JLabel bannerLabel;
 	private GifLabel gifBackLabel;
 	private JLabel blurBackLabel;
 
@@ -79,23 +83,29 @@ public class ClientGUI extends JFrame {
 	private OnlineUsersPanel onlinePanel;
 	// private NotificationFrame notif;
 
-	private Font font = new Font("", Font.BOLD, 20);
+	static Font font = new Font("", Font.BOLD, 16);
+	static Font fontSmall = new Font("", Font.BOLD, 12);
 
 	private class KeyboardDispatcher implements KeyEventDispatcher {
 		public boolean dispatchKeyEvent(KeyEvent e) {
 			if (e.getID() == KeyEvent.KEY_PRESSED) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					if (page == 1) {
+				switch (e.getKeyCode()) {
+				case KeyEvent.VK_ENTER:
+					switch (page) {
+					case 1:
 						handleLogin();
-					} else if (page == 2) {
+						break;
+					case 2:
 						handleRegister();
-					} else if (page == 3) {
+						break;
+					case 3:
 						String text = message.getText();
 						Client.out.println(text);
 						messages.addMessagePanel("Me: " + text);
 						message.setText("");
 					}
-				} else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+					break;
+				case KeyEvent.VK_ESCAPE:
 					if (page == 3) {
 						message.setVisible(false);
 						messages.setVisible(false);
@@ -115,37 +125,37 @@ public class ClientGUI extends JFrame {
 	JTextField userText = new JTextField();
 	JLabel userError = new JLabel();
 
-	JPasswordField passwordText = new JPasswordField();
+	JPasswordField loginPassword = new JPasswordField();
 	JLabel passError = new JLabel();
 
-	JTextField registerPass = new JTextField();
+	JTextField registerPassword = new JTextField();
 
 	public ClientGUI() {
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		try {
-			setIconImage(ImageIO.read(new File("icon.png")));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		setUndecorated(true);
-		setResizable(false);
 
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		toolkit = Toolkit.getDefaultToolkit();
+
+		Dimension screenSize = toolkit.getScreenSize();
+//		DisplayMode screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode();
 		int screenWidth = (int) screenSize.getWidth();
 		int screenHeight = (int) screenSize.getHeight();
-		setPreferredSize(new Dimension(screenWidth * 7 / 12, screenHeight * 7 / 12));
-		setLocation(screenWidth * 5 / 24, screenHeight * 5 / 24);
 		frameWidth = screenWidth * 7 / 12;
 		frameHeight = screenHeight * 7 / 12;
 
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setIconImage(toolkit.getImage("images/icon.png"));
+		setUndecorated(true);
+		setResizable(false);
+		setTitle("Neighborhood Messenger");
+		setLocation(screenWidth * 5 / 24, screenHeight * 5 / 24);
+		setPreferredSize(new Dimension(frameWidth, frameHeight));
+		
 		sp = new SpringLayout();
 		c = new JPanel(sp);
 		setContentPane(c);
 
-		blurBackLabel = new JLabel(new ImageIcon(Toolkit.getDefaultToolkit().createImage("NeighborhoodBlured.jpg")
-				.getScaledInstance(frameWidth, frameHeight, Image.SCALE_DEFAULT)));
-
-		banner = Toolkit.getDefaultToolkit().createImage("banner.png");
+		blurBackLabel = new JLabel(new ImageIcon(toolkit.getImage("images/backgrounds/NeighborhoodBlured.jpg").getScaledInstance(frameWidth, frameHeight, Image.SCALE_SMOOTH)));
+		bannerLabel = new JLabel(new ImageIcon(toolkit.getImage("images/banner.png").getScaledInstance(frameWidth / 2, -1, Image.SCALE_SMOOTH)));
+		unknownUser = new ImageIcon(toolkit.getImage("images/social/unknown.png").getScaledInstance(-1, frameHeight / 19, Image.SCALE_SMOOTH));
 
 		// notif = new NotificationFrame(screenWidth, screenHeight);
 
@@ -155,22 +165,17 @@ public class ClientGUI extends JFrame {
 		buildMenu();
 
 		WelcomeGUI();
+
 	}
 
 	private void buildMenu() {
 
-		try {
-			logo.setIcon(new ImageIcon(ImageIO.read(new File("icon.png"))));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		logo.setIcon(new ImageIcon(getIconImage().getScaledInstance(-1, frameHeight/19, Image.SCALE_SMOOTH)));
 		logo.add(setting);
 		logo.add(about);
 		logo.addSeparator();
 		logo.add(minimize);
 		logo.add(exit);
-
-		changeMenu(0);
 
 		menubar.add(logo);
 		menubar.add(Box.createHorizontalGlue());
@@ -180,8 +185,7 @@ public class ClientGUI extends JFrame {
 		menubar.setBorderPainted(false);
 
 		menuItemsActions();
-
-		dragAndMove(menubar);
+		enableDragAndMove();
 
 		setJMenuBar(menubar);
 
@@ -206,8 +210,7 @@ public class ClientGUI extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					Client.out.println("$exit");
-				} catch (Exception useless) {
-				}
+				} catch (Exception useless) {}
 				dispose();
 				System.gc();
 				System.exit(0);
@@ -238,6 +241,7 @@ public class ClientGUI extends JFrame {
 
 		page = 0;
 		c.removeAll();
+		changeMenu(0);
 
 		JLabel loading = new JLabel();
 		loading.setFont(new Font("", Font.BOLD, 30));
@@ -246,12 +250,11 @@ public class ClientGUI extends JFrame {
 		sp.putConstraint(SpringLayout.SOUTH, loading, -5, SpringLayout.SOUTH, c);
 		c.add(loading);
 
-		JLabel gifStorage = new JLabel();
-		gifStorage.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().createImage("loading.gif")
-				.getScaledInstance(frameWidth / 10, frameHeight / 5, Image.SCALE_DEFAULT)));
-		sp.putConstraint(SpringLayout.EAST, gifStorage, 0, SpringLayout.EAST, c);
-		sp.putConstraint(SpringLayout.SOUTH, gifStorage, 0, SpringLayout.SOUTH, c);
-		c.add(gifStorage);
+		JLabel loadingLabel = new JLabel();
+		loadingLabel.setIcon(new ImageIcon(toolkit.getImage("images/loading.gif").getScaledInstance(frameWidth / 10, frameHeight / 5, Image.SCALE_SMOOTH)));
+		sp.putConstraint(SpringLayout.EAST, loadingLabel, 0, SpringLayout.EAST, c);
+		sp.putConstraint(SpringLayout.SOUTH, loadingLabel, 0, SpringLayout.SOUTH, c);
+		c.add(loadingLabel);
 
 		c.add(blurBackLabel);
 
@@ -264,11 +267,6 @@ public class ClientGUI extends JFrame {
 
 			loading.setText("Connecting To Server");
 			pack();
-			// try {
-			// Thread.sleep(1000);
-			// } catch (InterruptedException e1) {
-			// e1.printStackTrace();
-			// }
 
 			try {
 
@@ -297,15 +295,13 @@ public class ClientGUI extends JFrame {
 
 		page = 1;
 		c.removeAll();
+		changeMenu(0);
 
 		gifBackLabel = new GifLabel();
 		gifBackLabel.start();
 
-		changeMenu(0);
-
-		JLabel bannerLabel = new JLabel(new ImageIcon(banner));
-		sp.putConstraint(SpringLayout.WEST, bannerLabel, frameWidth / 2 - 550, SpringLayout.WEST, c);
-		sp.putConstraint(SpringLayout.NORTH, bannerLabel, 100, SpringLayout.NORTH, c);
+		sp.putConstraint(SpringLayout.HORIZONTAL_CENTER, bannerLabel, 0, SpringLayout.HORIZONTAL_CENTER, c);
+		sp.putConstraint(SpringLayout.NORTH, bannerLabel, frameHeight / 10, SpringLayout.NORTH, c);
 		c.add(bannerLabel);
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -315,7 +311,6 @@ public class ClientGUI extends JFrame {
 		userPanel.setOpaque(false);
 
 		JLabel userLabel = new JLabel("Username");
-		userLabel.setPreferredSize(new Dimension(100, 70));
 		userPanel.add(userLabel);
 
 		userText.setHorizontalAlignment(JTextField.CENTER);
@@ -325,7 +320,7 @@ public class ClientGUI extends JFrame {
 		userError.setForeground(new Color(255, 0, 0));
 		userPanel.add(userError);
 
-		sp.putConstraint(SpringLayout.WEST, userPanel, frameWidth / 3, SpringLayout.WEST, c);
+		sp.putConstraint(SpringLayout.HORIZONTAL_CENTER, userPanel, 0, SpringLayout.HORIZONTAL_CENTER, c);
 		sp.putConstraint(SpringLayout.NORTH, userPanel, frameHeight / 4, SpringLayout.NORTH, c);
 		c.add(userPanel);
 
@@ -336,18 +331,17 @@ public class ClientGUI extends JFrame {
 		passPanel.setOpaque(false);
 
 		JLabel passwordLabel = new JLabel("Password");
-		passwordLabel.setPreferredSize(new Dimension(100, 70));
 		passPanel.add(passwordLabel);
 
-		passwordText.setHorizontalAlignment(JTextField.CENTER);
-		passwordText.setEchoChar('*');
-		passwordText.setPreferredSize(new Dimension(frameWidth / 3, frameHeight / 20));
-		passPanel.add(passwordText);
+		loginPassword.setHorizontalAlignment(JTextField.CENTER);
+		loginPassword.setEchoChar('*');
+		loginPassword.setPreferredSize(new Dimension(frameWidth / 3, frameHeight / 20));
+		passPanel.add(loginPassword);
 
 		passError.setForeground(new Color(255, 0, 0));
 		passPanel.add(passError);
 
-		sp.putConstraint(SpringLayout.WEST, passPanel, frameWidth / 3, SpringLayout.WEST, c);
+		sp.putConstraint(SpringLayout.HORIZONTAL_CENTER, passPanel, 0, SpringLayout.HORIZONTAL_CENTER, c);
 		sp.putConstraint(SpringLayout.NORTH, passPanel, frameHeight * 5 / 12, SpringLayout.NORTH, c);
 		c.add(passPanel);
 
@@ -363,13 +357,9 @@ public class ClientGUI extends JFrame {
 		loginButton.setBorderPainted(false);
 		loginButton.setContentAreaFilled(false);
 		loginButton.setPreferredSize(new Dimension(frameWidth / 5, frameHeight / 16));
-		try {
-			loginButton.setIcon(new ImageIcon(ImageIO.read(new File("Buttons/login.png"))));
-			loginButton.setRolloverIcon(new ImageIcon(ImageIO.read(new File("Buttons/login hover.png"))));
-			loginButton.setPressedIcon(new ImageIcon(ImageIO.read(new File("Buttons/login pressed.png"))));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		loginButton.setIcon(new ImageIcon(toolkit.getImage("images/buttons/login.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_SMOOTH)));
+		loginButton.setRolloverIcon(new ImageIcon(toolkit.getImage("images/buttons/loginHover.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_SMOOTH)));
+		loginButton.setPressedIcon(new ImageIcon(toolkit.getImage("images/buttons/loginPressed.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_SMOOTH)));
 		buttonPanel.add(loginButton);
 
 		JPanel seperator = new JPanel();
@@ -384,7 +374,7 @@ public class ClientGUI extends JFrame {
 		registerButton.setContentAreaFilled(false);
 		buttonPanel.add(registerButton);
 
-		sp.putConstraint(SpringLayout.WEST, buttonPanel, frameWidth * 2 / 5, SpringLayout.WEST, c);
+		sp.putConstraint(SpringLayout.HORIZONTAL_CENTER, buttonPanel, 0, SpringLayout.HORIZONTAL_CENTER, c);
 		sp.putConstraint(SpringLayout.NORTH, buttonPanel, frameHeight * 15 / 24, SpringLayout.NORTH, c);
 		c.add(buttonPanel);
 
@@ -393,6 +383,8 @@ public class ClientGUI extends JFrame {
 		userText.requestFocusInWindow();
 		c.add(gifBackLabel);
 		changeFont(c, font);
+		userError.setFont(fontSmall);
+		passError.setFont(fontSmall);
 		pack();
 
 		loginButton.addActionListener(new ActionListener() {
@@ -400,7 +392,6 @@ public class ClientGUI extends JFrame {
 				handleLogin();
 			}
 		});
-
 		registerButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				RegisterGUI();
@@ -413,6 +404,7 @@ public class ClientGUI extends JFrame {
 
 		page = 2;
 		c.removeAll();
+		changeMenu(0);
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -421,7 +413,6 @@ public class ClientGUI extends JFrame {
 		userPanel.setOpaque(false);
 
 		JLabel userLabel = new JLabel("Enter A Username");
-		userLabel.setPreferredSize(new Dimension(200, 70));
 		userPanel.add(userLabel);
 
 		userText.setHorizontalAlignment(JTextField.CENTER);
@@ -433,18 +424,18 @@ public class ClientGUI extends JFrame {
 		userError.setForeground(new Color(255, 0, 0));
 		userPanel.add(userError);
 
-		sp.putConstraint(SpringLayout.WEST, userPanel, frameWidth / 3, SpringLayout.WEST, c);
+		sp.putConstraint(SpringLayout.HORIZONTAL_CENTER, userPanel, 0, SpringLayout.HORIZONTAL_CENTER, c);
 		sp.putConstraint(SpringLayout.NORTH, userPanel, frameHeight / 4, SpringLayout.NORTH, c);
 		c.add(userPanel);
 
 		JPanel userReq = new JPanel();
 		userReq.setLayout(new BoxLayout(userReq, BoxLayout.Y_AXIS));
-		userReq.add(new JLabel("Just don't start it with $"));
+		userReq.add(new JLabel("- Just don't start it with $"));
 		userReq.add(Box.createVerticalStrut(4));
-		userReq.add(new JLabel("You can't change it later"));
+		userReq.add(new JLabel("- You can't change it later"));
 		userReq.setOpaque(false);
-		sp.putConstraint(SpringLayout.WEST, userReq, 30, SpringLayout.EAST, userPanel);
-		sp.putConstraint(SpringLayout.NORTH, userReq, 95, SpringLayout.NORTH, userPanel);
+		sp.putConstraint(SpringLayout.WEST, userReq, 20, SpringLayout.EAST, userPanel);
+		sp.putConstraint(SpringLayout.NORTH, userReq, 30, SpringLayout.NORTH, userPanel);
 		c.add(userReq);
 		userReq.setVisible(false);
 
@@ -452,7 +443,6 @@ public class ClientGUI extends JFrame {
 			public void focusLost(FocusEvent e) {
 				userReq.setVisible(false);
 			}
-
 			public void focusGained(FocusEvent e) {
 				userReq.setVisible(true);
 			}
@@ -465,33 +455,31 @@ public class ClientGUI extends JFrame {
 		passPanel.setOpaque(false);
 
 		JLabel passwordLabel = new JLabel("Enter A Password");
-		passwordLabel.setPreferredSize(new Dimension(200, 70));
 		passPanel.add(passwordLabel);
 
-		registerPass.setHorizontalAlignment(JTextField.CENTER);
-		registerPass.setPreferredSize(new Dimension(frameWidth / 3, frameHeight / 20));
-		passPanel.add(registerPass);
+		registerPassword.setHorizontalAlignment(JTextField.CENTER);
+		registerPassword.setPreferredSize(new Dimension(frameWidth / 3, frameHeight / 20));
+		passPanel.add(registerPassword);
 
 		passError.setForeground(new Color(255, 0, 0));
 		passPanel.add(passError);
 
-		sp.putConstraint(SpringLayout.WEST, passPanel, frameWidth / 3, SpringLayout.WEST, c);
+		sp.putConstraint(SpringLayout.HORIZONTAL_CENTER, passPanel, 0, SpringLayout.HORIZONTAL_CENTER, c);
 		sp.putConstraint(SpringLayout.NORTH, passPanel, frameHeight * 5 / 12, SpringLayout.NORTH, c);
 		c.add(passPanel);
 
 		JPanel passReq = new JPanel();
 		passReq.add(new JLabel("Just don't forget your password... :)"));
 		passReq.setOpaque(false);
-		sp.putConstraint(SpringLayout.WEST, passReq, 30, SpringLayout.EAST, passPanel);
-		sp.putConstraint(SpringLayout.NORTH, passReq, 95, SpringLayout.NORTH, passPanel);
+		sp.putConstraint(SpringLayout.WEST, passReq, 20, SpringLayout.EAST, passPanel);
+		sp.putConstraint(SpringLayout.NORTH, passReq, 28, SpringLayout.NORTH, passPanel);
 		c.add(passReq);
 		passReq.setVisible(false);
 
-		registerPass.addFocusListener(new FocusListener() {
+		registerPassword.addFocusListener(new FocusListener() {
 			public void focusLost(FocusEvent e) {
 				passReq.setVisible(false);
 			}
-
 			public void focusGained(FocusEvent e) {
 				passReq.setVisible(true);
 			}
@@ -505,14 +493,10 @@ public class ClientGUI extends JFrame {
 		registerButton.setBorderPainted(false);
 		registerButton.setContentAreaFilled(false);
 		registerButton.setPreferredSize(new Dimension(frameWidth / 5, frameHeight / 16));
-		try {
-			registerButton.setIcon(new ImageIcon(ImageIO.read(new File("Buttons/register.png"))));
-			registerButton.setRolloverIcon(new ImageIcon(ImageIO.read(new File("Buttons/register hover.png"))));
-			registerButton.setPressedIcon(new ImageIcon(ImageIO.read(new File("Buttons/register pressed.png"))));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		sp.putConstraint(SpringLayout.WEST, registerButton, frameWidth * 2 / 5, SpringLayout.WEST, c);
+		registerButton.setIcon(new ImageIcon(toolkit.getImage("images/buttons/register.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_SMOOTH)));
+		registerButton.setRolloverIcon(new ImageIcon(toolkit.getImage("images/buttons/registerHover.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_SMOOTH)));
+		registerButton.setPressedIcon(new ImageIcon(toolkit.getImage("images/buttons/registerPressed.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_SMOOTH)));
+		sp.putConstraint(SpringLayout.HORIZONTAL_CENTER, registerButton, 0, SpringLayout.HORIZONTAL_CENTER, c);
 		sp.putConstraint(SpringLayout.NORTH, registerButton, frameHeight * 15 / 24, SpringLayout.NORTH, c);
 		c.add(registerButton);
 
@@ -520,6 +504,8 @@ public class ClientGUI extends JFrame {
 
 		c.add(gifBackLabel);
 		changeFont(c, font);
+		userError.setFont(fontSmall);
+		passError.setFont(fontSmall);
 		pack();
 
 		registerButton.addActionListener(new ActionListener() {
@@ -533,10 +519,8 @@ public class ClientGUI extends JFrame {
 	private void MainGUI() {
 
 		page = 3;
-
 		gifBackLabel.stop();
 		c.removeAll();
-
 		changeMenu(1);
 
 		onlinePanel = new OnlineUsersPanel(frameWidth / 5, frameHeight);
@@ -546,30 +530,25 @@ public class ClientGUI extends JFrame {
 		add(jsp);
 		new Thread(new Runnable() {
 			public void run() {
-				BufferedReader onlinesReceiver = null;
 				try {
-					onlinesReceiver = new BufferedReader(new InputStreamReader(onlines.getInputStream()));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				while (true) {
-					try {
-						String[] onlineCommand = onlinesReceiver.readLine().split("_");
-						if (onlineCommand[0].equals("$addOnline"))
-							onlinePanel.addPanel(frameWidth / 5, 70, onlineCommand[1]);
-						else
-							onlinePanel.removePanel(onlineCommand[1]);
-					} catch (IOException e) {
-						break;
+					BufferedReader onlinesReceiver = new BufferedReader(new InputStreamReader(onlines.getInputStream()));
+					while (true) {
+						try {
+							String[] onlineCommand = onlinesReceiver.readLine().split("_");
+							if (onlineCommand[0].equals("$addOnline"))
+								onlinePanel.addPanel(frameWidth / 5, 70, onlineCommand[1]);
+							else
+								onlinePanel.removePanel(onlineCommand[1]);
+						} catch (IOException e) {
+							break;
+						}
 					}
-				}
-				try {
 					onlines.close();
+					WelcomeGUI();
+					return;
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				WelcomeGUI();
-				return;
 			}
 		}).start();
 
@@ -619,16 +598,14 @@ public class ClientGUI extends JFrame {
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					int commandResult;
 					String temp = client.in.readLine();
-					// messages.addImagePanel(ImageIO.read(new File("banner.png")));
 					while (true) {
 						if ((temp.length() != 0) && (temp.charAt(0) == '$')) {
-							commandResult = client.handle(temp);
-							if (commandResult == 0) {
+							switch (client.handle(temp)) {
+							case 0:
 								LoginGUI();
 								return;
-							} else if (commandResult == 2) {
+							case 2:
 								while (true) {
 									temp = client.in.readLine();
 									if (temp.charAt(0) == '$')
@@ -636,22 +613,21 @@ public class ClientGUI extends JFrame {
 									if (temp.startsWith(client.me))
 										temp = "Me" + temp.substring(temp.indexOf(":"));
 									messages.addMessagePanel(temp);
-									messageArea.getVerticalScrollBar()
-											.setValue(messageArea.getVerticalScrollBar().getMaximum());
+									messageArea.getVerticalScrollBar().setValue(messageArea.getVerticalScrollBar().getMaximum());
 								}
-							}
-							// else if(commandResult == 3)
-							// notif.showNewNotif(temp.substring(10));
-							else
+								break;
+//							case 3:
+//								notif.showNewNotif(temp.substring(10));
+//								break:
+							default:
 								temp = client.in.readLine();
+							}
 							continue;
 						}
 						messages.addMessagePanel(temp);
 						temp = client.in.readLine();
 					}
-				} catch (IOException e) {
-					return;
-				}
+				} catch (IOException e) {}
 			}
 		}).start();
 
@@ -659,7 +635,6 @@ public class ClientGUI extends JFrame {
 		message.requestFocusInWindow();
 		changeFont(c, font);
 		pack();
-
 	}
 
 	private void changeMenu(int i) {
@@ -674,11 +649,7 @@ public class ClientGUI extends JFrame {
 			break;
 		case 1:
 			account.setText(client.me);
-			try {
-				account.setIcon(new ImageIcon(ImageIO.read(new File("users/unknown.png"))));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			account.setIcon(unknownUser);
 			account.add(profile);
 			account.add(recFile);
 			account.add(signout);
@@ -689,71 +660,72 @@ public class ClientGUI extends JFrame {
 	}
 
 	private void handleLogin() {
-
-		if (!userText.getText().equals("")) {
-			userError.setText("");
-			if (passwordText.getPassword().length != 0) {
-				int result = client.login(userText.getText(), passwordText.getPassword());
-				switch (result) {
-				case 0:
-					passError.setText("");
-					changeMenu(1);
-					MainGUI();
-					return;
-				case 1:
-					userError.setText("No user was found with the given username");
-					return;
-				case 2:
-					passError.setText("Wrong password for the given username");
-					return;
-				case 3:
-					userError.setText("Another device is logged in with the given username");
-					return;
-				case 4:
-					userError.setText("This user is banned from the server");
-					return;
-				}
-				passwordText.setText("");
-			} else
-				passError.setText("Password Required");
-		} else {
+		
+		boolean error = false;
+		passError.setText("");
+		userError.setText("");
+		
+		if (userText.getText().equals("")) {
 			userError.setText("Username Required");
-			if (passwordText.getPassword().length == 0)
-				passError.setText("Password Required");
-			else
-				passError.setText("");
+			error = true;
 		}
+		if (loginPassword.getPassword().length == 0) {
+			passError.setText("Password Required");
+			error = true;
+		}
+
+		if (!error) {
+			int result = client.login(userText.getText(), loginPassword.getPassword());
+			switch (result) {
+			case 0:
+				MainGUI();
+				return;
+			case 1:
+				userError.setText("No user was found with the given username");
+				break;
+			case 2:
+				passError.setText("Wrong password for the given username");
+				break;
+			case 3:
+				userError.setText("Another device is logged in with the given username");
+				break;
+			case 4:
+				userError.setText("This user is banned from the server");
+			}
+		}
+		loginPassword.setText("");
 
 	}
 
 	public void handleRegister() {
-
-		if (!userText.getText().equals("")) {
-			if (!(userText.getText().charAt(0) == '$')) {
-				userError.setText("");
-				if (registerPass.getText().length() != 0) {
-					int result = client.register(userText.getText(), registerPass.getText());
-					switch (result) {
-					case 0:
-						passError.setText("");
-						LoginGUI();
-						return;
-					case 1:
-						userError.setText("The given username already exists");
-						return;
-					}
-					registerPass.setText("");
-				} else
-					passError.setText("Password Required");
-			} else
-				userError.setText("Username Not Valid");
-		} else {
+		
+		boolean error = false;
+		passError.setText("");
+		userError.setText("");
+		
+		if (userText.getText().equals("")) {
 			userError.setText("Username Required");
-			if (registerPass.getText().length() == 0)
-				passError.setText("Password Required");
-			else
-				passError.setText("");
+			error = true;
 		}
+		if (loginPassword.getPassword().length == 0) {
+			passError.setText("Password Required");
+			error = true;
+		}
+
+		if (!error) {
+			if (!(userText.getText().charAt(0) == '$')) {
+				int result = client.register(userText.getText(), registerPassword.getText());
+				switch (result) {
+				case 0:
+					LoginGUI();
+					return;
+				case 1:
+					userError.setText("The given username already exists");
+					break;
+				}
+			} else userError.setText("Username Not Valid");
+		}
+		registerPassword.setText("");
 
 	}
 
@@ -766,14 +738,14 @@ public class ClientGUI extends JFrame {
 		}
 	}
 
-	private void dragAndMove(Component component) {
-		component.addMouseListener(new MouseAdapter() {
+	private void enableDragAndMove() {
+		menubar.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				pX = e.getX();
 				pY = e.getY();
 			}
 		});
-		component.addMouseMotionListener(new MouseAdapter() {
+		menubar.addMouseMotionListener(new MouseAdapter() {
 			public void mouseDragged(MouseEvent evt) {
 				setLocation(getLocation().x + evt.getX() - pX, getLocation().y + evt.getY() - pY);
 			}

@@ -32,11 +32,9 @@ public class UserPanel extends JPanel {
 		add(username, BorderLayout.CENTER);
 
 		addMouseListener(new MouseListener() {
-			public void mouseReleased(MouseEvent e) {
-			}
+			public void mouseReleased(MouseEvent e) {}
 
-			public void mousePressed(MouseEvent e) {
-			}
+			public void mousePressed(MouseEvent e) {}
 
 			public void mouseExited(MouseEvent e) {
 				if (index != selectedUser)
