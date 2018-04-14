@@ -24,51 +24,48 @@ public class Client {
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 	}
 
-	public int login(String text, char[] password) {
+	public int login(String username, char[] password) throws IOException {
 
-		out.println("$loginTry_" + text);
-		try {
-			String response = in.readLine();
-			if (response.equals("$login_error_userAlreadyOn")) {
-				return 3;
-			} else if (response.equals("$login_error_userNotFound")) {
-				return 1;
-			} else if (response.equals("$login_error_userBanned")) {
-				return 4;
-			} else if (response.equals("$login_userFound")) {
-				byte[] passByte = new byte[password.length];
-				for (int i = 0; i < password.length; i++)
-					passByte[i] = (byte) password[i];
-				DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
-				dOut.writeInt(passByte.length);
-				dOut.write(passByte);
-				response = in.readLine();
-				if (response.equals("$login_success")) {
-					me = text;
-					return 0;
-				} else if (response.equals("$login_error_password"))
-					return 2;
+		out.println("$loginTry_" + username);
+		String response = in.readLine();
+		switch (response) {
+		case "$login_error_userAlreadyOn":
+			return 3;
+		case "$login_error_userNotFound":
+			return 1;
+		case "$login_error_userBanned":
+			return 4;
+		case "$login_userFound":
+			byte[] passByte = new byte[password.length];
+			for (int i = 0; i < password.length; ++i)
+				passByte[i] = (byte) password[i];
+			DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
+			dOut.writeInt(passByte.length);
+			dOut.write(passByte);
+			response = in.readLine();
+			switch (response) {
+			case "$login_success":
+				me = username;
+				return 0;
+			case "$login_error_password":
+				return 2;
 			}
-		} catch (IOException e) {
 		}
 		return 5;
 	}
 
-	public int register(String text, String pass) {
+	public int register(String text, String pass) throws IOException {
 		out.println("$registerTry_" + text);
-		try {
-			String response = in.readLine();
-			if (response.equals("$registerResult_error_usernameExists"))
-				return 1;
-			else if (response.equals("$registerResult_usernameOK")) {
-				out.println("$continue");
-				out.println(pass);
-				response = in.readLine();
-				if (response.equals("$registerResult_success"))
-					return 0;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		String response = in.readLine();
+		switch (response) {
+		case "$registerResult_error_usernameExists":
+			return 1;
+		case "$registerResult_usernameOK":
+			out.println("$continue");
+			out.println(pass);
+			response = in.readLine();
+			if (response.equals("$registerResult_success"))
+				return 0;
 		}
 		return 2;
 	}

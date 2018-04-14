@@ -11,7 +11,7 @@ import javax.swing.Scrollable;
 
 public class OnlineUsersPanel extends JPanel implements Scrollable {
 
-	private static final long serialVersionUID = 100L;
+	private static final long serialVersionUID = -8538206417145222824L;
 
 	static Vector<UserPanel> onlines = new Vector<>();
 

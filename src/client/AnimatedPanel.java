@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 
 public class AnimatedPanel extends JLayeredPane {
 
-	private static final long serialVersionUID = 4L;
+	private static final long serialVersionUID = -6358400323949431910L;
 
 	private int speed;
 	private Timer timer;
@@ -32,7 +32,7 @@ public class AnimatedPanel extends JLayeredPane {
 
 	}
 
-	protected void showOrHide() {
+	void showOrHide() {
 
 		speed *= -1;
 		timer.cancel();
@@ -53,7 +53,7 @@ public class AnimatedPanel extends JLayeredPane {
 
 	}
 
-	public boolean isOpen() {
+	boolean isOpen() {
 		return (speed > 0) ? true : false;
 	}
 

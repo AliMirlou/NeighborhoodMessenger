@@ -17,7 +17,7 @@ import javax.swing.SpringLayout;
 
 public class FilePanel extends AnimatedPanel {
 
-	private static final long serialVersionUID = 12L;
+	private static final long serialVersionUID = -2981748978102754085L;
 
 	private SpringLayout sp = new SpringLayout();
 
@@ -53,10 +53,10 @@ public class FilePanel extends AnimatedPanel {
 		sp.putConstraint(SpringLayout.EAST, closeLid, -3, SpringLayout.EAST, this);
 		add(closeLid, 1, 0);
 
-		Actions();
+		enableActions();
 	}
 
-	private void Actions() {
+	private void enableActions() {
 
 		search.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -75,9 +75,9 @@ public class FilePanel extends AnimatedPanel {
 	protected void tryToFind() {
 		fileClient.connect();
 		String a = searchField.getText();
-		if (fileClient.search(a)) {
+		if (fileClient.search(a))
 			fade();
-		} else
+		else
 			fileClient.disconnect();
 	}
 

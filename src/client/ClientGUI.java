@@ -48,13 +48,13 @@ public class ClientGUI extends JFrame {
 	private Client client;
 	private Socket onlines;
 
-	Toolkit toolkit;
+	private Toolkit toolkit;
 
 	static int frameWidth;
 	static int frameHeight;
 
-	protected int pX;
-	protected int pY;
+	int pX;
+	int pY;
 
 	private JPanel c;
 	private SpringLayout sp;
@@ -83,7 +83,7 @@ public class ClientGUI extends JFrame {
 	private OnlineUsersPanel onlinePanel;
 	// private NotificationFrame notif;
 
-	static Font font = new Font("", Font.BOLD, 16);
+	static Font font = new Font("", Font.BOLD, 15);
 	static Font fontSmall = new Font("", Font.BOLD, 12);
 
 	private class KeyboardDispatcher implements KeyEventDispatcher {
@@ -93,10 +93,20 @@ public class ClientGUI extends JFrame {
 				case KeyEvent.VK_ENTER:
 					switch (page) {
 					case 1:
-						handleLogin();
+						try {
+							handleLogin();
+						} catch (IOException e1) {
+							e1.printStackTrace();
+							System.exit(ERROR);
+						}
 						break;
 					case 2:
-						handleRegister();
+						try {
+							handleRegister();
+						} catch (IOException e1) {
+							e1.printStackTrace();
+							System.exit(ERROR);
+						}
 						break;
 					case 3:
 						String text = message.getText();
@@ -153,9 +163,9 @@ public class ClientGUI extends JFrame {
 		c = new JPanel(sp);
 		setContentPane(c);
 
-		blurBackLabel = new JLabel(new ImageIcon(toolkit.getImage("images/backgrounds/NeighborhoodBlured.jpg").getScaledInstance(frameWidth, frameHeight, Image.SCALE_SMOOTH)));
-		bannerLabel = new JLabel(new ImageIcon(toolkit.getImage("images/banner.png").getScaledInstance(frameWidth / 2, -1, Image.SCALE_SMOOTH)));
-		unknownUser = new ImageIcon(toolkit.getImage("images/social/unknown.png").getScaledInstance(-1, frameHeight / 19, Image.SCALE_SMOOTH));
+		blurBackLabel = new JLabel(new ImageIcon(toolkit.getImage("images/backgrounds/NeighborhoodBlured.jpg").getScaledInstance(frameWidth, frameHeight, Image.SCALE_AREA_AVERAGING)));
+		bannerLabel = new JLabel(new ImageIcon(toolkit.getImage("images/banner.png").getScaledInstance(frameWidth / 2, -1, Image.SCALE_AREA_AVERAGING)));
+		unknownUser = new ImageIcon(toolkit.getImage("images/social/unknown.png").getScaledInstance(-1, frameHeight / 19, Image.SCALE_AREA_AVERAGING));
 
 		// notif = new NotificationFrame(screenWidth, screenHeight);
 
@@ -170,7 +180,7 @@ public class ClientGUI extends JFrame {
 
 	private void buildMenu() {
 
-		logo.setIcon(new ImageIcon(getIconImage().getScaledInstance(-1, frameHeight/19, Image.SCALE_SMOOTH)));
+		logo.setIcon(new ImageIcon(getIconImage().getScaledInstance(-1, frameHeight/19, Image.SCALE_AREA_AVERAGING)));
 		logo.add(setting);
 		logo.add(about);
 		logo.addSeparator();
@@ -251,7 +261,7 @@ public class ClientGUI extends JFrame {
 		c.add(loading);
 
 		JLabel loadingLabel = new JLabel();
-		loadingLabel.setIcon(new ImageIcon(toolkit.getImage("images/loading.gif").getScaledInstance(frameWidth / 10, frameHeight / 5, Image.SCALE_SMOOTH)));
+		loadingLabel.setIcon(new ImageIcon(toolkit.getImage("images/loading.gif").getScaledInstance(frameWidth / 10, frameHeight / 5, Image.SCALE_AREA_AVERAGING)));
 		sp.putConstraint(SpringLayout.EAST, loadingLabel, 0, SpringLayout.EAST, c);
 		sp.putConstraint(SpringLayout.SOUTH, loadingLabel, 0, SpringLayout.SOUTH, c);
 		c.add(loadingLabel);
@@ -357,9 +367,9 @@ public class ClientGUI extends JFrame {
 		loginButton.setBorderPainted(false);
 		loginButton.setContentAreaFilled(false);
 		loginButton.setPreferredSize(new Dimension(frameWidth / 5, frameHeight / 16));
-		loginButton.setIcon(new ImageIcon(toolkit.getImage("images/buttons/login.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_SMOOTH)));
-		loginButton.setRolloverIcon(new ImageIcon(toolkit.getImage("images/buttons/loginHover.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_SMOOTH)));
-		loginButton.setPressedIcon(new ImageIcon(toolkit.getImage("images/buttons/loginPressed.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_SMOOTH)));
+		loginButton.setIcon(new ImageIcon(toolkit.getImage("images/buttons/login.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_AREA_AVERAGING)));
+		loginButton.setRolloverIcon(new ImageIcon(toolkit.getImage("images/buttons/loginHover.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_AREA_AVERAGING)));
+		loginButton.setPressedIcon(new ImageIcon(toolkit.getImage("images/buttons/loginPressed.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_AREA_AVERAGING)));
 		buttonPanel.add(loginButton);
 
 		JPanel seperator = new JPanel();
@@ -389,7 +399,12 @@ public class ClientGUI extends JFrame {
 
 		loginButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				handleLogin();
+				try {
+					handleLogin();
+				} catch (IOException e) {
+					e.printStackTrace();
+					System.exit(ERROR);
+				}
 			}
 		});
 		registerButton.addActionListener(new ActionListener() {
@@ -493,9 +508,9 @@ public class ClientGUI extends JFrame {
 		registerButton.setBorderPainted(false);
 		registerButton.setContentAreaFilled(false);
 		registerButton.setPreferredSize(new Dimension(frameWidth / 5, frameHeight / 16));
-		registerButton.setIcon(new ImageIcon(toolkit.getImage("images/buttons/register.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_SMOOTH)));
-		registerButton.setRolloverIcon(new ImageIcon(toolkit.getImage("images/buttons/registerHover.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_SMOOTH)));
-		registerButton.setPressedIcon(new ImageIcon(toolkit.getImage("images/buttons/registerPressed.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_SMOOTH)));
+		registerButton.setIcon(new ImageIcon(toolkit.getImage("images/buttons/register.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_AREA_AVERAGING)));
+		registerButton.setRolloverIcon(new ImageIcon(toolkit.getImage("images/buttons/registerHover.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_AREA_AVERAGING)));
+		registerButton.setPressedIcon(new ImageIcon(toolkit.getImage("images/buttons/registerPressed.png").getScaledInstance(-1, frameHeight/19, Image.SCALE_AREA_AVERAGING)));
 		sp.putConstraint(SpringLayout.HORIZONTAL_CENTER, registerButton, 0, SpringLayout.HORIZONTAL_CENTER, c);
 		sp.putConstraint(SpringLayout.NORTH, registerButton, frameHeight * 15 / 24, SpringLayout.NORTH, c);
 		c.add(registerButton);
@@ -510,7 +525,12 @@ public class ClientGUI extends JFrame {
 
 		registerButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				handleRegister();
+				try {
+					handleRegister();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+					System.exit(ERROR);
+				}
 			}
 		});
 
@@ -659,12 +679,12 @@ public class ClientGUI extends JFrame {
 
 	}
 
-	private void handleLogin() {
-		
+	private void handleLogin() throws IOException {
+
 		boolean error = false;
 		passError.setText("");
 		userError.setText("");
-		
+
 		if (userText.getText().equals("")) {
 			userError.setText("Username Required");
 			error = true;
@@ -697,12 +717,12 @@ public class ClientGUI extends JFrame {
 
 	}
 
-	public void handleRegister() {
-		
+	public void handleRegister() throws IOException {
+
 		boolean error = false;
 		passError.setText("");
 		userError.setText("");
-		
+
 		if (userText.getText().equals("")) {
 			userError.setText("Username Required");
 			error = true;
@@ -723,7 +743,7 @@ public class ClientGUI extends JFrame {
 					userError.setText("The given username already exists");
 					break;
 				}
-			} else userError.setText("Username Not Valid");
+			} else userError.setText("Username is not valid");
 		}
 		registerPassword.setText("");
 
